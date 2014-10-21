@@ -1,0 +1,50 @@
+
+Supported features are creating models via INSERT SQL::
+
+    >>> from crate.django.testing.models import User
+    >>> user = User.objects.create(id=1, username="mfelsche", slogan="Shut the fuck up!")
+    >>> user.id
+    1
+
+We have to call refresh explicitly in order to make sure the row is available::
+
+    >>> from django.db import connection
+    >>> cursor = connection.cursor()
+    >>> cursor.execute("refresh table testing_user")
+
+    # TODO: make this work
+    # >>> User.objects.refresh()
+
+We are able to get the columns of the created user
+
+    >>> user.username
+    'mfelsche'
+
+    >>> user.slogan
+    'Shut the fuck up!'
+
+We are able to query for it by primary key::
+
+    >>> del user
+    >>> user = User.objects.get(id=1)
+    >>> user.id
+    1
+    >>> user.username
+    'mfelsche'
+    >>> user.slogan
+    'Shut the fuck up!'
+
+And to search for it using fulltext search (using the simple match predicate)::
+
+    >>> searched_user = User.objects.get(slogan__search='fuck')
+    >>> searched_user == user
+    True
+
+Deletion is possible, too::
+
+    >>> user.delete()
+
+    >>> User.objects.get(id=1)
+    Traceback (most recent call last):
+    ...
+    crate.django.testing.models.DoesNotExist: User matching query does not exist.
