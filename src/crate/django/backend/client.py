@@ -11,5 +11,7 @@ class DatabaseClient(BaseDatabaseClient):
         settings_dict = self.connection.settings_dict
 
         import sys
-        sys.argv = [sys.argv[0], "--hosts", settings_dict['SERVERS']]
+        sys.argv = [sys.argv[0], "--hosts"]
+        for server in settings_dict['SERVERS']:
+            sys.argv.extend(("--hosts", server))
         crash_main()
