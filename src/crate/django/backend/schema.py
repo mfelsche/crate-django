@@ -27,7 +27,7 @@ class CrateSchemaEditor(BaseDatabaseSchemaEditor):
     """TODO"""
 
     sql_delete_table = "DROP TABLE %(table)s"
-    sql_create_table = "CREATE TABLE %(table)s (%(definition)s) %(clustering)s %(table_settings)s"
+    sql_create_table = "CREATE TABLE %(table)s (%(definition)s) %(partitioned)s %(clustering)s %(table_settings)s"
 
     def column_sql(self, model, field, include_default=False):
         # Get the column's type and use that as the basis of the SQL
@@ -144,11 +144,13 @@ class CrateSchemaEditor(BaseDatabaseSchemaEditor):
         # CRATE OPTIONS
         clustered_by = getattr(model._meta, "clustered_by", None)
         number_of_shards = getattr(model._meta, "number_of_shards", None)
-        clustering = " CLUSTERED"
-        if clustered_by:
-            clustering += " BY ({0})".format(self.quote_name(clustered_by))
-        if number_of_shards:
-            clustering += " INTO {0} SHARDS".format(number_of_shards)
+        clustering = ""
+        if clustered_by or number_of_shards:
+            clustering = " CLUSTERED"
+            if clustered_by:
+                clustering += " BY ({0})".format(self.quote_name(clustered_by))
+            if number_of_shards:
+                clustering += " INTO {0} SHARDS".format(number_of_shards)
 
         partitioned = ""
         partitioned_by = getattr(model._meta, "partitioned_by", [])
@@ -172,8 +174,9 @@ class CrateSchemaEditor(BaseDatabaseSchemaEditor):
         sql = self.sql_create_table % {
             "table": self.quote_name(model._meta.db_table),
             "definition": ", ".join(column_sqls),
-            "clustering": "",
-            "table_settings": "WITH (number_of_replicas='0-all')"
+            "clustering": clustering,
+            "partitioned": partitioned,
+            "table_settings": table_settings
         }
 
         self.execute(sql, params)
@@ -221,3 +224,6 @@ class CrateSchemaEditor(BaseDatabaseSchemaEditor):
 
     def alter_field(self, model, old_field, new_field, strict=False):
         raise NotImplementedError("changing a field is not supported")
+
+    def alter_unique_together(self, model, old_unique_together, new_unique_together):
+        pass

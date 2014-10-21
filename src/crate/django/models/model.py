@@ -34,9 +34,6 @@ import warnings
 import sys
 
 
-from crate.django.models.manager import CrateManager
-
-
 class CrateOptions(Options):
 
     DEFAULT_NUMBER_OF_SHARDS = 5
