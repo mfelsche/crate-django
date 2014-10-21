@@ -3,42 +3,43 @@
 from django.db.models.sql import compiler
 
 
-class SQLCompiler(compiler.SQLCompiler):
+class CrateParameterMixin(object):
+    def as_sql(self, **kwargs):
+        if kwargs:
+            result = super(CrateParameterMixin, self).as_sql(**kwargs)
+        else:
+            result = super(CrateParameterMixin, self).as_sql()
+        if isinstance(result, list):
+            sql, params = result[0]
+            return [(sql.replace("%s", "?"), params)]
+        else:
+            return result[0].replace("%s", "?"), result[1]
 
-    def as_sql(self, with_limits=True, with_col_aliases=False):
-        sql, params = super(SQLCompiler, self).as_sql(with_limits=with_limits, with_col_aliases=with_col_aliases)
-        return sql.replace("%s", "?"), params
 
-
-class SQLInsertCompiler(compiler.SQLInsertCompiler, SQLCompiler):
+class SQLCompiler(CrateParameterMixin, compiler.SQLCompiler):
     pass
 
 
-class SQLDeleteCompiler(compiler.SQLDeleteCompiler, SQLCompiler):
-    def as_sql(self):
-        """
-        hack for converting djangos arguments placeholders into question marks
-        as crate-python uses dbapi option ``paramstyle=qmark`` which is not supported by
-        django
-
-        TODO: make a Pull Request for django to support this dbapi option
-        :return: tuple of (<sql-statement>, <list of params>)
-        """
-        sql, params = super(SQLDeleteCompiler, self).as_sql()
-        return sql.replace("%s", "?"), params
-
-
-class SQLUpdateCompiler(compiler.SQLUpdateCompiler, SQLCompiler):
+class SQLInsertCompiler(CrateParameterMixin, compiler.SQLInsertCompiler):
+    """TODO: add _id if primary key is not given"""
     pass
 
 
-class SQLAggregateCompiler(compiler.SQLAggregateCompiler, SQLCompiler):
+class SQLDeleteCompiler(CrateParameterMixin, compiler.SQLDeleteCompiler):
     pass
 
 
-class SQLDateCompiler(compiler.SQLDateCompiler, SQLCompiler):
+class SQLUpdateCompiler(CrateParameterMixin, compiler.SQLUpdateCompiler):
     pass
 
 
-class SQLDateTimeCompiler(compiler.SQLDateTimeCompiler, SQLCompiler):
+class SQLAggregateCompiler(CrateParameterMixin, compiler.SQLAggregateCompiler):
+    pass
+
+
+class SQLDateCompiler(CrateParameterMixin, compiler.SQLDateCompiler):
+    pass
+
+
+class SQLDateTimeCompiler(CrateParameterMixin, compiler.SQLDateTimeCompiler):
     pass
