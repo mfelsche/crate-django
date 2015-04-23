@@ -27,7 +27,7 @@ class DatabaseFeatures(BaseDatabaseFeatures):
 
     can_use_chunked_reads = False
     can_return_id_from_insert = False
-    has_bulk_insert = False
+    has_bulk_insert = True
     uses_savepoints = False
     can_combine_inserts_with_and_without_auto_increment_pk = False
 
@@ -120,6 +120,9 @@ class DatabaseFeatures(BaseDatabaseFeatures):
     # supported by the Python driver
     supports_paramstyle_pyformat = False
 
+    has_case_insensitive_like = False
+
+    bare_select_suffix = " FROM sys.cluster"
 
 class DatabaseWrapper(BaseDatabaseWrapper):
 

@@ -71,4 +71,8 @@ class DoubleField(_DjangoFloatField, Field):
 class IPField(_DjangoIPField, Field):
     pass
 
+
+class ObjectField(Field):
+    pass
+
 # TODO: ObjectField, ArrayField, TimeStampField

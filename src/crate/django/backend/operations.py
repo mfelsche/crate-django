@@ -72,3 +72,6 @@ class DatabaseOperations(BaseDatabaseOperations):
     def end_transaction_sql(self, success=True):
         """not supported"""
         return ''
+
+    def pk_default_value(self):
+        return "NULL"

@@ -30,8 +30,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = (
-    'django.contrib.admin',
-    'django.contrib.auth',
+    #'django.contrib.admin',  # not usable because of foreign key stuff
+    #'django.contrib.auth',   # not usable because of foreign key stuff
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
